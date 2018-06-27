@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import binascii #pour convertir l'hexa en string
-from urllib2 import Request, urlopen, URLError, HTTPError #pour pouvoir appeler une url
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError #pour pouvoir appeler une url
 import socket #pour afficher gérer les sockets (utilisé ici que pour afficher une erreur de timeout)
 from xml.dom.minidom import parse #pour pouvoir parser un fichier XML  avec minidom
 import base64
@@ -45,7 +46,7 @@ while erreur_generale == False:
   try:
     donnee = mirror.read(16)
   except Exception as e:
-    print "Erreur inconnue (lecture du  mir:ror) : %s" % e
+    print("Erreur inconnue (lecture du  mir:ror) : %s" % e)
     erreur_generale = True
 
   #on test les données renvoyées par le mir:ror
@@ -53,7 +54,7 @@ while erreur_generale == False:
     try:
       rfid_id = binascii.hexlify(donnee)[4:]
     except Exception as e:
-      print "Erreur inconnue (conversion binaire-string) : %s" % e
+      print("Erreur inconnue (conversion binaire-string) : %s" % e)
 
     #on test les 2 premiers octets pour savoir si une puce RFID est posée ou retirée
     if donnee[0:2] == '\x02\x01': #puce posée
@@ -70,21 +71,21 @@ while erreur_generale == False:
             #on essaye d'appeler la requête
             url = urlopen(requete, timeout = 1)
           except HTTPError as e:
-            print 'Le serveur n''a pas pu répondre à la demande.'
-            print 'Error code: ', e.code
+            print('Le serveur n''a pas pu répondre à la demande.')
+            print('Error code: ', e.code)
           except URLError as e:
             try:
               if e.reason.errno == 111:
-                print "Connexion refusée."
+                print("Connexion refusée.")
               if isinstance(e.reason, socket.timeout):
-                print "Temps de connexion dépassé."
+                print("Temps de connexion dépassé.")
             except:
-              print "Erreur  : %s" % e.reason
+              print("Erreur  : %s" % e.reason)
 
           puce_definie_dans_xml = True
 
       if puce_definie_dans_xml == False:
-        print "Puce %s posée." % rfid_id
+        print("Puce %s posée." % rfid_id)
 
     elif donnee[0:2] == '\x02\x02': #puce retirée
       #liste des puces qui doivent faire une action quand la retire sur le mir:ror
@@ -100,26 +101,26 @@ while erreur_generale == False:
             #on essaye d'appeler la requête
             url = urlopen(requete, timeout = 1)
           except HTTPError as e:
-            print 'Le serveur n''a pas pu répondre à la demande.'
-            print 'Error code: ', e.code
+            print('Le serveur n''a pas pu répondre à la demande.')
+            print('Error code: ', e.code)
           except URLError as e:
             try:
               if e.reason.errno == 111:
-                print "Connexion refusée."
+                print("Connexion refusée.")
               if isinstance(e.reason, socket.timeout):
-                print "Temps de connexion dépassé."
+                print("Temps de connexion dépassé.")
             except:
-              print "Erreur  : %s" % e.reason
+              print("Erreur  : %s" % e.reason)
 
           puce_definie_dans_xml = True
 
       if puce_definie_dans_xml == False:
-        print "Puce %s retirée." % rfid_id
+        print("Puce %s retirée." % rfid_id)
 
     #on test le ler octet, s'il vaut 1, alors une action à été faite sur le mir:ror
     if donnee[0] == '\x01':
 
       if donnee[1] == '\x04':
-        print "Le mir:ror est retourné face vers le haut"
+        print("Le mir:ror est retourné face vers le haut")
       if donnee[1] == '\x05':
-        print "Le mir:ror est retourné face vers le bas"
+        print("Le mir:ror est retourné face vers le bas")
